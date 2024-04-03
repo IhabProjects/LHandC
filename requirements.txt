@@ -1,1 +1,1 @@
-pip install opencv-python numpy pyautogui mediapipe screeninfo
+pip install opencv-python mediapipe numpy pillow tk ttkthemes
