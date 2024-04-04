@@ -15,11 +15,12 @@ This Python script utilizes the MediaPipe library to detect hand gestures from a
 - win32api
 - ttkthemes
 - screeninfo
+- pyautogui
 
 ## Installation
 1. Make sure you have Python installed on your system.
 2. Install the required Python packages using pip:
-pip install opencv-python mediapipe numpy pillow tk ttkthemes
+pip install opencv-python mediapipe numpy pillow tk ttkthemes pyautogui
 3. Additionally, if you are on a Windows system, install the `pywin32` package:
 pip install pywin32
 ## Usage

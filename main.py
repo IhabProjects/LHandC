@@ -9,6 +9,7 @@ import win32api
 from PIL import Image, ImageTk
 import time
 import ttkthemes as ThemedTk
+import pyautogui
 
 class HandDetector:
     def __init__(self):
@@ -23,6 +24,7 @@ class HandDetector:
         # Pinch state variables
         self.pinch_detected = False
         self.prev_pinch_distance = None
+        self.prev_pinch_state = False
 
         # Create main window
         self.root = ThemedTk.ThemedTk()
@@ -118,12 +120,17 @@ class HandDetector:
                         index_tip = hand_landmarks.landmark[mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP]
                         thumb_index_distance = np.sqrt((thumb_tip.x - index_tip.x)**2 + (thumb_tip.y - index_tip.y)**2)
                         
-                        if thumb_index_distance < self.pinch_threshold:
-                            self.pinch_detected = True
-                            print("Pinch detected!")
-                        else:
-                            self.pinch_detected = False
-
+                        # Check if pinch is detected
+                        pinch_detected = thumb_index_distance < self.pinch_threshold
+                        
+                        if pinch_detected and not self.prev_pinch_state:
+                            print("Pinch started!")
+                            pyautogui.mouseDown()  # Simulate mouse click down
+                        elif not pinch_detected and self.prev_pinch_state:  # Release mouse click when pinch ends
+                            print("Pinch ended!")
+                            pyautogui.mouseUp()  # Simulate mouse click up
+                        # Update previous pinch state
+                        self.prev_pinch_state = pinch_detected
                 self.display_frame(frame)
 
     def display_frame(self, frame):
