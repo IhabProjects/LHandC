@@ -120,8 +120,11 @@ class HandDetector:
                         index_tip = hand_landmarks.landmark[mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP]
                         thumb_index_distance = np.sqrt((thumb_tip.x - index_tip.x)**2 + (thumb_tip.y - index_tip.y)**2)
                         
+                        # Adjust pinch threshold dynamically based on finger movement
+                        adjusted_pinch_threshold = self.pinch_threshold + 0.1 * thumb_index_distance
+                        
                         # Check if pinch is detected
-                        pinch_detected = thumb_index_distance < self.pinch_threshold
+                        pinch_detected = thumb_index_distance < adjusted_pinch_threshold
                         
                         if pinch_detected and not self.prev_pinch_state:
                             print("Pinch started!")
