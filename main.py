@@ -12,14 +12,14 @@ import ttkthemes as ThemedTk
 
 class HandDetector:
     def __init__(self):
-        self.detect_hand = False
+        self.detect_hand = False # Flag to control hand detection
 
-        # Default parameters
+        # Default parameters for hand detection
         self.detection_confidence = 0.5
         self.tracking_confidence = 0.5
         self.cursor_sensitivity = 1.0
-        self.pinch_threshold = 0.03  # Adjusted for better detection
-
+        self.pinch_threshold = 0.03  # Threshold for pinch detection
+        
         # Pinch state variables
         self.pinch_detected = False
         self.prev_pinch_distance = None
@@ -32,7 +32,7 @@ class HandDetector:
         self.root.title("Hand Gesture Control")
         self.root.geometry("800x600")
 
-        # Main frame
+        # Main frame for GUI elements
         self.main_frame = ttk.Frame(self.root)
         self.main_frame.pack(expand=True, fill="both", padx=20, pady=20)
 
@@ -40,11 +40,11 @@ class HandDetector:
         self.canvas = tk.Canvas(self.main_frame, width=640, height=480, bg='black', highlightthickness=0)
         self.canvas.pack(side=tk.LEFT, padx=20, pady=20)
 
-        # Parameters frame
+        # Frame for parameters
         self.params_frame = ttk.Frame(self.main_frame)
         self.params_frame.pack(side=tk.RIGHT, padx=20, pady=20, fill='y')
 
-        # Parameters labels and sliders
+        # Labels and sliders for parameters
         self.detection_confidence_label = ttk.Label(self.params_frame, text="Detection Confidence")
         self.detection_confidence_label.grid(row=0, column=0, padx=10, pady=5)
         self.detection_confidence_slider = ttk.Scale(self.params_frame, from_=0, to=1, length=200, orient=tk.HORIZONTAL, command=self.update_detection_confidence)
@@ -63,7 +63,7 @@ class HandDetector:
         self.cursor_sensitivity_slider.set(self.cursor_sensitivity)
         self.cursor_sensitivity_slider.grid(row=2, column=1, padx=10, pady=5)
 
-        # Start/Stop button
+        # Start/Stop button for hand detection
         self.start_stop_button = ttk.Button(self.params_frame, text="START", command=self.toggle_detection)
         self.start_stop_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
@@ -73,13 +73,16 @@ class HandDetector:
     def toggle_detection(self):
         self.detect_hand = not self.detect_hand
         if self.detect_hand:
+            # Start a new thread for hand detection
             threading.Thread(target=self.detect_hand_landmarks, daemon=True).start()
 
     def stop_detection(self):
+        # Stop hand detection
         self.detect_hand = False
         print("Hand detection stopped.")
 
     def detect_hand_landmarks(self):
+        # Detect hand landmarks using MediaPipe
         cap = cv2.VideoCapture(0)
         mp_hands = mp.solutions.hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=self.detection_confidence, min_tracking_confidence=self.tracking_confidence)
         
@@ -124,6 +127,7 @@ class HandDetector:
                 self.display_frame(frame)
 
     def display_frame(self, frame):
+        # Display frame with detected landmarks
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         img = Image.fromarray(frame)
         img_tk = ImageTk.PhotoImage(image=img)
@@ -131,6 +135,7 @@ class HandDetector:
         self.root.img = img_tk
 
     def calculate_hand_center(self, landmarks, frame_shape):
+        # Calculate the center of the hand
         landmarks_x = [lm.x * frame_shape[1] for lm in landmarks]
         landmarks_y = [lm.y * frame_shape[0] for lm in landmarks]
         center_x = int(np.mean(landmarks_x))
@@ -138,6 +143,7 @@ class HandDetector:
         return center_x, center_y
 
     def map_to_screen_coordinates(self, camera_x, camera_y, camera_width, camera_height):
+        # Map camera coordinates to screen coordinates
         screen_widths = [monitor.width for monitor in get_monitors()]
         screen_height = self.root.winfo_screenheight()
         
@@ -153,20 +159,25 @@ class HandDetector:
         return screen_x, screen_y
 
     def draw_landmarks(self, frame, landmarks):
+        # Draw landmarks on the frame
         for landmark in landmarks:
             cx, cy = int(landmark.x * frame.shape[1]), int(landmark.y * frame.shape[0])
             cv2.circle(frame, (cx, cy), 5, (255, 0, 0), -1)
 
     def update_detection_confidence(self, value):
+        # Update the detection confidence
         self.detection_confidence = float(value)
 
     def update_tracking_confidence(self, value):
+        # Update the tracking confidence
         self.tracking_confidence = float(value)
 
     def update_cursor_sensitivity(self, value):
+        # Update the cursor sensitivity
         self.cursor_sensitivity = float(value)
 
     def on_close(self):
+        # Stop hand detection when closing the application
         self.stop_detection()
         self.root.destroy()
 
